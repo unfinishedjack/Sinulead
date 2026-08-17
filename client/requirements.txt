@@ -1,0 +1,10 @@
+PySide6
+qtawesome
+playwright
+phonenumbers
+psutil
+openpyxl
+httpx
+keyring
+pyinstaller
+pillow

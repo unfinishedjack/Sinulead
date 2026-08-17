@@ -1,0 +1,85 @@
+"""
+data/transactions.py
+
+Admin-only "Payment History" table -- every submitted payment proof, its
+review status (Pending/Completed/Rejected), and the admin notes attached
+during manual review. Distinct from data/billing.py's BILLING_TRANSACTIONS,
+which is the shorter, user-facing "Recent Transactions" list on the Buy
+Credits tab.
+
+Moved out of the old flat data.py as part of splitting it into a data/
+package (see PROGRESS.md, Phase 2e). See data/accounts.py's docstring
+(Phase 2a) for why this directory has no __init__.py yet -- `import data`
+still resolves to the original data.py unchanged until Phase 2f's cutover.
+"""
+
+TRANSACTIONS = [
+    {"ref": "TXN-20260731-001", "name": "John Doe", "email": "john@gmail.com",
+     "method": "GCash", "credits": 1200, "bonus": None, "amount": 100,
+     "status": "Pending", "submitted": "Jul 31, 2026 04:45 AM",
+     "note": "Please add credits ASAP. Thank you!", "admin_notes": "",
+     "receipt": "gcash_receipt_0731.jpg"},
+    {"ref": "TXN-20260731-002", "name": "Jane Smith", "email": "jane@gmail.com",
+     "method": "Maya (PayMaya)", "credits": 3500, "bonus": "+40% Bonus", "amount": 250,
+     "status": "Pending", "submitted": "Jul 31, 2026 03:21 AM",
+     "note": "", "admin_notes": "", "receipt": "maya_receipt_0731.jpg"},
+    {"ref": "TXN-20260731-004", "name": "Anna Lee", "email": "anna@gmail.com",
+     "method": "GCash", "credits": 1200, "bonus": None, "amount": 100,
+     "status": "Pending", "submitted": "Jul 31, 2026 12:32 AM",
+     "note": "", "admin_notes": "", "receipt": "gcash_receipt_anna.jpg"},
+    {"ref": "TXN-20260730-006", "name": "Mark Reyes", "email": "mark@gmail.com",
+     "method": "Maya (PayMaya)", "credits": 3500, "bonus": "+40% Bonus", "amount": 250,
+     "status": "Pending", "submitted": "Jul 30, 2026 11:05 PM",
+     "note": "", "admin_notes": "", "receipt": "maya_receipt_mark.jpg"},
+    {"ref": "TXN-20260730-008", "name": "Pat Garcia", "email": "pat@gmail.com",
+     "method": "PayPal", "credits": 1200, "bonus": None, "amount": 100,
+     "status": "Pending", "submitted": "Jul 30, 2026 09:18 PM",
+     "note": "", "admin_notes": "", "receipt": "paypal_receipt_pat.jpg"},
+    {"ref": "TXN-20260730-009", "name": "Luis Lane", "email": "luis@gmail.com",
+     "method": "GCash", "credits": 3500, "bonus": "+40% Bonus", "amount": 250,
+     "status": "Pending", "submitted": "Jul 30, 2026 08:55 PM",
+     "note": "", "admin_notes": "", "receipt": "gcash_receipt_luis.jpg"},
+    {"ref": "TXN-20260730-010", "name": "Daniel Bennett", "email": "daniel@gmail.com",
+     "method": "GCash", "credits": 1200, "bonus": None, "amount": 100,
+     "status": "Pending", "submitted": "Jul 30, 2026 06:30 PM",
+     "note": "", "admin_notes": "", "receipt": "gcash_receipt_daniel.jpg"},
+    {"ref": "TXN-20260729-012", "name": "Sarah Flores", "email": "sarah@gmail.com",
+     "method": "PayPal", "credits": 3500, "bonus": "+40% Bonus", "amount": 250,
+     "status": "Pending", "submitted": "Jul 29, 2026 09:14 PM",
+     "note": "", "admin_notes": "", "receipt": "paypal_receipt_sarah.jpg"},
+    {"ref": "TXN-20260729-013", "name": "Kate Williams", "email": "kate@gmail.com",
+     "method": "Maya (PayMaya)", "credits": 8000, "bonus": "+60% Bonus", "amount": 500,
+     "status": "Pending", "submitted": "Jul 29, 2026 07:42 PM",
+     "note": "", "admin_notes": "", "receipt": "maya_receipt_kate.jpg"},
+    {"ref": "TXN-20260729-014", "name": "Mike Brown", "email": "mike@gmail.com",
+     "method": "PayPal", "credits": 1200, "bonus": None, "amount": 100,
+     "status": "Pending", "submitted": "Jul 29, 2026 05:53 PM",
+     "note": "", "admin_notes": "", "receipt": "paypal_receipt_mike.jpg"},
+    {"ref": "TXN-20260731-003", "name": "Chris Evans", "email": "chris@gmail.com",
+     "method": "GCash", "credits": 500, "bonus": None, "amount": 50,
+     "status": "Completed", "submitted": "Jul 31, 2026 02:10 AM",
+     "note": "", "admin_notes": "Verified against GCash ledger.",
+     "receipt": "gcash_receipt_chris.jpg"},
+    {"ref": "TXN-20260730-005", "name": "John Doe", "email": "john@gmail.com",
+     "method": "PayPal", "credits": 8000, "bonus": "+60% Bonus", "amount": 500,
+     "status": "Completed", "submitted": "Jul 30, 2026 10:40 PM",
+     "note": "", "admin_notes": "", "receipt": "paypal_receipt_john2.jpg"},
+    {"ref": "TXN-20260730-007", "name": "Jane Smith", "email": "jane@gmail.com",
+     "method": "GCash", "credits": 1200, "bonus": None, "amount": 100,
+     "status": "Completed", "submitted": "Jul 30, 2026 09:55 PM",
+     "note": "", "admin_notes": "", "receipt": "gcash_receipt_jane.jpg"},
+    {"ref": "TXN-20260729-011", "name": "Anna Lee", "email": "anna@gmail.com",
+     "method": "Maya (PayMaya)", "credits": 3500, "bonus": "+40% Bonus", "amount": 250,
+     "status": "Completed", "submitted": "Jul 29, 2026 08:30 PM",
+     "note": "", "admin_notes": "", "receipt": "maya_receipt_anna2.jpg"},
+    {"ref": "TXN-20260728-015", "name": "Luis Lane", "email": "luis@gmail.com",
+     "method": "GCash", "credits": 500, "bonus": None, "amount": 50,
+     "status": "Rejected", "submitted": "Jul 28, 2026 06:15 PM",
+     "note": "", "admin_notes": "Receipt image was unreadable -- asked user to resubmit.",
+     "receipt": "gcash_receipt_luis2.jpg"},
+    {"ref": "TXN-20260727-016", "name": "Pat Garcia", "email": "pat@gmail.com",
+     "method": "PayPal", "credits": 1200, "bonus": None, "amount": 100,
+     "status": "Rejected", "submitted": "Jul 27, 2026 03:05 PM",
+     "note": "", "admin_notes": "Amount paid did not match the selected package.",
+     "receipt": "paypal_receipt_pat2.jpg"},
+]

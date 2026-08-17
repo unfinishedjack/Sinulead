@@ -1,0 +1,2 @@
+pip install -r client/requirements.txt
+pip install -r server/requirements.txt

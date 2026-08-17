@@ -1,0 +1,8 @@
+sinulead.db
+__pycache__/
+*.pyc
+.venv/
+.env
+*.deb
+*.rpm
+*.egg-info/
