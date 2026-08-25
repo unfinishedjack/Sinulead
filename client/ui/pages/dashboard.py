@@ -418,15 +418,26 @@ class Dashboard(QMainWindow):
         if self._prefetch_queue:
             QTimer.singleShot(0, lambda: self._prefetch_next_page(generation))
 
-    def on_credits_changed(self, remaining: int, total: int):
-        self.credits_remaining = remaining
-        self.credits_total = total
-        # Phase 2: the spend is already persisted server-side by whichever
-        # api_client.spend_credits() call in SearchLeadsPage triggered this
-        # signal (see search_leads.py's on_unlock_row/on_bulk_unlock) --
-        # `remaining` here is the balance the server itself returned, not
-        # a locally-computed guess, so there's nothing left to write here.
-        self.update_credits_display()
+        def on_credits_changed(self, remaining: int, total: int):
+            self.credits_remaining = remaining
+            self.credits_total = total
+            # Phase 2: the spend is already persisted server-side by whichever
+            # api_client.spend_credits() call in SearchLeadsPage triggered this
+            # signal (see search_leads.py's on_unlock_row/on_bulk_unlock) --
+            # `remaining` here is the balance the server itself returned, not
+            # a locally-computed guess, so there's nothing left to write here.
+            #
+            # SearchLeadsPage keeps its own local credits_remaining/total
+            # (used by on_unlock_row's affordability check) instead of reading
+            # this Dashboard's copy -- so a balance change that originates
+            # elsewhere (Earn Credits claim, admin grant, billing/purchase)
+            # has to be pushed back into it explicitly, or unlocking stays
+            # stuck comparing against a stale (e.g. pre-claim) balance until
+            # the app is restarted and SearchLeadsPage is rebuilt from scratch.
+            if self.search_leads_page is not None:
+                self.search_leads_page.credits_remaining = remaining
+                self.search_leads_page.credits_total = total
+            self.update_credits_display()
 
     def set_active_nav(self, page_name: str):
         """Switches self.stack to the requested page AND moves the red
