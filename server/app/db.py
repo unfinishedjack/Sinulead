@@ -55,6 +55,20 @@ from app.config import (
 from app.security import hash_password, verify_password, looks_hashed
 
 
+def _now_str() -> str:
+    """Python-side default/onupdate for created_at/updated_at columns.
+
+    Used to be server_default=func.datetime("now"), which only works on
+    SQLite (Postgres has no datetime() function -- it errors with
+    UndefinedFunction on CREATE TABLE the moment DATABASE_URL points at
+    Postgres instead of SQLite). Computing the value in Python instead
+    of delegating to the DB works identically on both, and matches the
+    exact "%Y-%m-%d %H:%M:%S" format already used everywhere else in
+    this file and in routers/auth.py for timestamp strings.
+    """
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -87,7 +101,7 @@ class User(Base):
     referral_code = Column(String, unique=True, nullable=True)
     referred_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     pending_bonus_credits = Column(Integer, nullable=False, default=0)
-    created_at = Column(String, nullable=False, server_default=func.datetime("now"))
+    created_at = Column(String, nullable=False, default=_now_str)
     last_active_at = Column(String, nullable=True)
     # Bumped automatically whenever a row changes (signup edits their own
     # profile, admin edits them in the Users tab, credits get adjusted,
@@ -95,8 +109,8 @@ class User(Base):
     # (bumped by login/activity, not edits).
     updated_at = Column(
         String, nullable=False,
-        server_default=func.datetime("now"),
-        onupdate=func.datetime("now"),
+        default=_now_str,
+        onupdate=_now_str,
     )
 
     __table_args__ = (
@@ -390,7 +404,7 @@ class SupportTicket(Base):
     subject = Column(String, nullable=False)
     message = Column(String, nullable=False)
     status = Column(String, nullable=False, default="open")  # open | closed -- no in-between states needed yet
-    created_at = Column(String, nullable=False, server_default=func.datetime("now"))
+    created_at = Column(String, nullable=False, default=_now_str)
 
 
 def _support_ticket_to_dict(row: SupportTicket) -> dict:
@@ -455,11 +469,11 @@ class Reward(Base):
     end_date = Column(String, nullable=True)
     claims = Column(Integer, nullable=False, default=0)
     prerequisite_reward_id = Column(String, ForeignKey("rewards.id"), nullable=True)
-    created_at = Column(String, nullable=False, server_default=func.datetime("now"))
+    created_at = Column(String, nullable=False, default=_now_str)
     updated_at = Column(
         String, nullable=False,
-        server_default=func.datetime("now"),
-        onupdate=func.datetime("now"),
+        default=_now_str,
+        onupdate=_now_str,
     )
 
     __table_args__ = (
@@ -514,11 +528,11 @@ class UserProgress(Base):
     progress_value = Column(Integer, nullable=False, default=0)
     last_progress_date = Column(String, nullable=True)
     last_activity_at = Column(String, nullable=True)
-    created_at = Column(String, nullable=False, server_default=func.datetime("now"))
+    created_at = Column(String, nullable=False, default=_now_str)
     updated_at = Column(
         String, nullable=False,
-        server_default=func.datetime("now"),
-        onupdate=func.datetime("now"),
+        default=_now_str,
+        onupdate=_now_str,
     )
 
     __table_args__ = (
@@ -543,11 +557,11 @@ class UserReward(Base):
     completed_at = Column(String, nullable=True)
     last_progress_at = Column(String, nullable=True)
     last_claimed_at = Column(String, nullable=True)
-    created_at = Column(String, nullable=False, server_default=func.datetime("now"))
+    created_at = Column(String, nullable=False, default=_now_str)
     updated_at = Column(
         String, nullable=False,
-        server_default=func.datetime("now"),
-        onupdate=func.datetime("now"),
+        default=_now_str,
+        onupdate=_now_str,
     )
 
     __table_args__ = (
@@ -570,7 +584,7 @@ class Referral(Base):
     referee_reward_value = Column(Integer, nullable=False, default=0)
     expires_at = Column(String, nullable=True)
     rewarded_at = Column(String, nullable=True)
-    created_at = Column(String, nullable=False, server_default=func.datetime("now"))
+    created_at = Column(String, nullable=False, default=_now_str)
 
     __table_args__ = (
         CheckConstraint(
@@ -597,7 +611,7 @@ class RewardLog(Base):
     referral_id = Column(Integer, ForeignKey("referrals.id"), nullable=True)
     reward_type = Column(String, nullable=True)
     reward_value = Column(Integer, nullable=True)
-    created_at = Column(String, nullable=False, server_default=func.datetime("now"))
+    created_at = Column(String, nullable=False, default=_now_str)
 
 
 class Search(Base):
@@ -615,7 +629,7 @@ class Search(Base):
     title = Column(String, nullable=False)
     header = Column(String, nullable=True)
     query_text = Column(String, nullable=False)
-    created_at = Column(String, nullable=False, server_default=func.datetime("now"))
+    created_at = Column(String, nullable=False, default=_now_str)
     # Soft-delete marker -- NULL means active/visible. Set (not row-deleted)
     # when the user hits the recent-search card's x button, so the credit
     # spend in start_search() and the leads scraped under it stay on record
@@ -651,7 +665,7 @@ class CreditReservation(Base):
     amount = Column(Integer, nullable=False)
     reason = Column(String, nullable=True)
     status = Column(String, nullable=False, default="held")
-    created_at = Column(String, nullable=False, server_default=func.datetime("now"))
+    created_at = Column(String, nullable=False, default=_now_str)
     resolved_at = Column(String, nullable=True)
 
     __table_args__ = (
@@ -793,7 +807,7 @@ class Lead(Base):
     email_addr = Column(String, nullable=True)
     unlocked_phone = Column(Boolean, nullable=False, default=False)
     unlocked_email = Column(Boolean, nullable=False, default=False)
-    created_at = Column(String, nullable=False, server_default=func.datetime("now"))
+    created_at = Column(String, nullable=False, default=_now_str)
 
 
 def _lead_to_dict(lead: "Lead | None") -> dict | None:
@@ -833,7 +847,7 @@ class Export(Base):
     format = Column(String, nullable=False)
     status = Column(String, nullable=False, default="Completed")
     file_path = Column(String, nullable=True)
-    created_at = Column(String, nullable=False, server_default=func.datetime("now"))
+    created_at = Column(String, nullable=False, default=_now_str)
 
 
 def _export_to_dict(export: "Export | None") -> dict | None:
@@ -875,7 +889,7 @@ class ActivityLog(Base):
     entity_id = Column(Integer, nullable=False)
     text = Column(String, nullable=False)
     meta = Column(String, nullable=True)
-    created_at = Column(String, nullable=False, server_default=func.datetime("now"))
+    created_at = Column(String, nullable=False, default=_now_str)
 
     __table_args__ = (
         CheckConstraint(
