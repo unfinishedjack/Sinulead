@@ -16,8 +16,10 @@ response on success.
 
 Base URL comes from the SINULEAD_API_URL environment variable (settable
 via the local .env file -- see core/env.py) so a packaged build can point
-at a real deployment without a code change; defaults to a local dev
-server for anyone running `uvicorn app.main:app --reload` out of server/.
+at a real deployment without a code change; defaults to the production
+Render deployment (see render.yaml at the repo root). Override it locally
+by setting SINULEAD_API_URL=http://127.0.0.1:8000 while running
+`uvicorn app.main:app --reload` out of server/.
 """
 
 import os
@@ -26,7 +28,7 @@ import httpx
 
 from core.session import get_token
 
-API_BASE_URL = os.environ.get("SINULEAD_API_URL", "https://sinulead-machine-linux.tail127b85.ts.net").rstrip("/") #http://127.0.0.1:8000
+API_BASE_URL = os.environ.get("SINULEAD_API_URL", "https://sinulead-api.onrender.com").rstrip("/")
 
 _TIMEOUT = 15.0  # seconds -- generous but bounded; this is a modal login dialog, it shouldn't hang forever
 
