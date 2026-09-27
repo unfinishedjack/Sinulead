@@ -42,7 +42,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy import (
     Column, Integer, String, Boolean, Float, ForeignKey, CheckConstraint,
-    UniqueConstraint, select,
+    UniqueConstraint, select, inspect,
 )
 from sqlalchemy.sql import func
 
@@ -67,6 +67,24 @@ def _now_str() -> str:
     this file and in routers/auth.py for timestamp strings.
     """
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def _table_columns(conn, table_name: str) -> set[str]:
+    """Column names currently on `table_name`, or an empty set if the
+    table doesn't exist yet.
+
+    Used to be `conn.exec_driver_sql(f"PRAGMA table_info({table_name})")`,
+    which is SQLite-only syntax -- Postgres has no PRAGMA statement at
+    all and errors with a plain SQL syntax error on it. SQLAlchemy's
+    inspector abstracts this the same way across every dialect, so the
+    small ad-hoc migrations below (add a column that a newer model
+    version introduced, on top of an older existing table) work whether
+    this is pointed at the local sinulead.db or a Postgres deployment.
+    """
+    inspector = inspect(conn)
+    if table_name not in inspector.get_table_names():
+        return set()
+    return {col["name"] for col in inspector.get_columns(table_name)}
 
 
 class User(Base):
@@ -1480,7 +1498,7 @@ def init_db() -> None:
     # existing databases (like the one shipped in this repo) pick it
     # up instead of silently dropping every maps_url that gets posted.
     with engine.connect() as conn:
-        existing_cols = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info(leads)")}
+        existing_cols = _table_columns(conn, "leads")
         if "leads" not in Base.metadata.tables:
             pass
         elif existing_cols and "maps_url" not in existing_cols:
@@ -1492,7 +1510,7 @@ def init_db() -> None:
         # existing row from before this column existed needs it patched
         # in (defaulting to 0/free, per the PricingSettings docstring)
         # rather than crashing every read/write of that row.
-        pricing_cols = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info(pricing_settings)")}
+        pricing_cols = _table_columns(conn, "pricing_settings")
         if "pricing_settings" not in Base.metadata.tables:
             pass
         else:
